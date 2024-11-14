@@ -1,0 +1,123 @@
+
+<%- include('./partials/header.ejs') -%>
+<%- include('./partials/navbar.ejs') -%>
+
+<div class="container">
+    <div id="payment-errors" class="alert alert-danger d-none">
+       
+    </div>
+<form action="/checkout" method="post" id="checkout-form">
+    <div class="form-group">
+        <label for="Name">Name</label>
+        <input type="text" name="name" value="" class="form-control" id="">
+    </div>
+
+    <div class="form-group">
+        <label for="Adress">Address</label>
+        <input type="text" name="address" value="" class="form-control" id="">
+    </div>
+
+    <div class="form-group">
+        <label for="Adress">Contact</label>
+        <input type="text" name="contact" value="" class="form-control" id="">
+    </div>
+
+    <div class="form-group">
+        <label for="credit card name">credit card name</label>
+        <input type="text" name="credit card name" placeholder="please enter your credit card name"
+            class="form-control" id="">
+    </div>
+
+
+    <div class="form-group">
+        <label for="credit card number">credit card number</label>
+        <div id="card-element">
+        <input type="number" name="credit card number" placeholder="please enter your credit card number"
+            class="form-control" id="card-number">
+    </div>
+</div>
+
+ 
+
+
+
+    <div class="row">
+        <div class="col-md-6">
+
+            <div class="form-group">
+                <label for=" expiration month">expiration month</label>
+                <div id="card-element">
+                <input type="number" name=" expiration month"
+                    placeholder="please enter your credit card expiration month" class="form-control" id="card-expiry-month">
+            </div>
+        </div>
+
+        </div>
+
+
+        <div class="col-md-6">
+
+            <div class="form-group">
+                <label for=" expiration year">expiration year</label>
+                <div id="card-element">
+                <input type="number" name=" expiration year"
+                    placeholder="please enter your credit card expiration year" class="form-control" id="card-expiry-year">
+            </div>
+        </div>
+
+    </div>
+
+    <div class="form-group">
+        <label for=" CVC">CVC</label>
+        <div id="card-element">
+        <input type="number" name=" expiration year" placeholder="please enter your credit card CVC"
+            class="form-control" id="card-cvc">
+        </div>
+    </div>
+
+    <div class="text-center">
+        <button type="submit" class="btn btn-success">Checkout $ <%= totalPrice %> </button>
+    </div>
+</form>
+
+
+</div>
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+     var stripe = Stripe('pk_test_51QHjb0P2SIAA7X34LkOgsEocd0TXJO4BKjwAa2z70rpXCpm1ZYWNGfuWsLEib67i56pt2bkzmBCXcPIha8zZ6IOk00e2tJg0HK');
+      var elements = stripe.elements(); 
+      var card = elements.create('card');
+       card.mount('#card-element');
+        var form = document.getElementById('checkout-form');
+         form.addEventListener('submit', function(event) {
+             event.preventDefault(); 
+             document.querySelector('button').disabled = true; 
+             document.getElementById('payment-errors').classList.add('d-none'); 
+             stripe.createToken(card).then(function(result) 
+             { 
+               
+                if (result.error) {
+                 console.log(result);
+                  var errorElement = document.getElementById('payment-errors');
+                  errorElement.textContent = result.error.message;
+                   errorElement.classList.remove('d-none');
+                    document.querySelector('button').disabled = false; 
+                    } else { 
+                        console.log(result); 
+                        stripeTokenHandler(result.token); 
+
+                    } }); 
+                }); 
+                function stripeTokenHandler(token) { 
+                    var hiddenInput = document.createElement('input');
+                     hiddenInput.setAttribute('type', 'hidden'); 
+                     hiddenInput.setAttribute('name', 'stripeToken'); 
+  hiddenInput.setAttribute('value', token.id); 
+  form.appendChild(hiddenInput); 
+  form.submit(); 
+} 
+  });
+</script>
+
+<%- include('./partials/footer.ejs') -%>
